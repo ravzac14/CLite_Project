@@ -1,0 +1,11 @@
+Zack Raver, ravzac14
+9/30/14
+
+Programming Language Design Lab 1
+
+1) What is the error code that happens?
+
+
+I've already made changes (adding the cases for ( and ) and , etc...
+
+But the error was it not finding a token type for ( at column 8

@@ -1,0 +1,40 @@
+Zack Raver; ravzac14
+Due week 3
+
+#2.8, 2.13, 2.16, 3.1, 3.2, 3.3, 3.4
+
+2.8) You can't write these...they don't have a case for '*'
+
+
+2.13) IfStatement -> {If (Expr) Statement | If (expr) Statement else Statement} FI 
+
+
+2.16) Where is G2
+
+
+3.1) Ident: S -> (Digit | Letter) A
+			A -> S
+			A -> []
+
+	Float:	S -> A	| Digit A
+			A -> Digit S | B 
+			B -> Period C 
+			C -> Digit D
+			D -> Digit C | C | []
+
+
+3.2) Not sure what the difference is...I guess they build from the right? If so, build towards that drietcion.
+
+
+3.3) Ident:	S -> Digit A | A
+			A -> Digit S | S | Letter B
+			B -> Digit A | Letter A | A | Digit C | Letter C | C	
+			C -> []
+
+
+3.4) define {a^nb^n} 
+
+	S -> aA 
+	A -> aS | bB
+	B -> bC
+	C -> bB | b
