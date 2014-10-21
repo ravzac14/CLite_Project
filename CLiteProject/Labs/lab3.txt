@@ -16,4 +16,14 @@ abstract syntax):
 
 4)
 
+- Added those extra cases for the braces, brackets, parens, etc.
+
+- Added the cases for < <= > >= = == ! !=
+
+- Added the isDigit method code
+
+- Added the chkOpt method code
+
+
+Tested on a few files
 
