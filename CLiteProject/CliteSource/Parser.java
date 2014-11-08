@@ -42,9 +42,9 @@ public class Parser {
         for (int i=0; i<header.length; i++)   // bypass "int main ( )"
             match(header[i]);
         match(TokenType.LeftBrace);
-        // student exercise
+        Program p1 = new Program(null,null);		//TEMPORARY STUB CODE FOR Declarations and Block for p1
         match(TokenType.RightBrace);
-        return null;  // student exercise
+        return p1;								
     }
   
     private Declarations declarations () {
@@ -73,14 +73,20 @@ public class Parser {
   
     private Block statements () {
         // Block --> '{' Statements '}'
-        Block b = new Block();
+        match(TokenType.LeftBrace);		//NEEDS TESTING
+		Block b = new Block();
+		match(TokenType.RightBrace);	//NEEDS TESTING
         // student exercise
         return b;
     }
   
     private Assignment assignment () {
         // Assignment --> Identifier = Expression ;
-        return null;  // student exercise
+        Variable target = new Variable(match(TokenType.Identifier));
+		match(TokenType.Assign);
+		Expression source = expression();
+		match(TokenType.Semicolon);
+		return new Assignment(target, source);
     }
   
     private Conditional ifStatement () {
@@ -95,22 +101,30 @@ public class Parser {
 
     private Expression expression () {
         // Expression --> Conjunction { || Conjunction }
-        return null;  // student exercise
+		//Expression -> Term | AddOp Term
+
+		Expression e = term();
+		while (isAddOp()){
+			Operator op = new Operator(match(token.type()));
+			Expression term2 = factor();
+			e = new Binary(op, e, term2);
+		}
+        return e;						// TEMPORARY PASSTHEBUCK RETURN
     }
   
     private Expression conjunction () {
         // Conjunction --> Equality { && Equality }
-        return null;  // student exercise
+        return (equality());						// TEMPORARY PASSTHEBUCK RETURN
     }
   
     private Expression equality () {
         // Equality --> Relation [ EquOp Relation ]
-        return null;  // student exercise
+        return (relation());						// TEMPORARY PASSTHEBUCK RETURN
     }
 
     private Expression relation (){
         // Relation --> Addition [RelOp Addition] 
-        return null;  // student exercise
+        return (addition());						//TEMPORARY PASSTHEBUCK RETURN
     }
   
     private Expression addition () {
@@ -168,7 +182,28 @@ public class Parser {
     }
 
     private Value literal( ) {
-        return null;  // student exercise
+		// Literal --> Boolean | Integer | Char | Float
+		//
+		String newValue = "";
+		Value realVal;
+		if (token.type().equals(TokenType.IntLiteral)){				//If is intLiteral token
+			newValue = match(TokenType.IntLiteral);
+			realVal = new IntValue(Integer.parseInt(newValue));
+		} else if (token.type().equals(TokenType.CharLiteral)){		//If is charLiteral token 
+			newValue = match(TokenType.CharLiteral);
+			realVal = new CharValue(newValue.charAt(0));
+		} else if (token.type().equals(TokenType.FloatLiteral)){	//If is floatLiteral token
+			newValue = match(TokenType.FloatLiteral);
+			realVal = new FloatValue(Float.parseFloat(newValue));
+		} else if (token.type().equals(TokenType.False)){			//If is boolLiteral:False token
+			realVal = new BoolValue(false);
+		} else if (token.type().equals(TokenType.True)){			//If is boolLoteral:True token
+			realVal = new BoolValue(true);
+		} else {
+			error("No literal value for that value");
+			realVal = null;						//returns a null object if none of the literal types are found 
+		}
+        return realVal;  									//This works now 
     }
   
 

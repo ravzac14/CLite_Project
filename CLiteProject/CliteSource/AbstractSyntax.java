@@ -11,7 +11,11 @@ class Program {
     Program (Declarations d, Block b) {
         decpart = d;
         body = b;
-    }
+	}
+	
+	public void display(){
+		System.out.println("Display abstract syntax tree");		//TEMPORARY STUB CODE FOR display() METHOD
+	}
 
 }
 
@@ -173,7 +177,7 @@ class IntValue extends Value {
         assert !undef : "reference to undefined int value";
         return value;
     }
-
+	
     public String toString( ) {
         if (undef)  return "undef";
         return "" + value;
