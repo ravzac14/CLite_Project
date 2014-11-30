@@ -37,22 +37,38 @@ public class Parser {
   
     public Program program() {
         // Program --> void main ( ) '{' Declarations Statements '}'
+		// p1(decs,bodyAsABlock)
+		// Decs = arraylist<dec>
+		// Body = block = arraylist<statements>
         TokenType[ ] header = {TokenType.Int, TokenType.Main,
                           TokenType.LeftParen, TokenType.RightParen};
         for (int i=0; i<header.length; i++)   // bypass "int main ( )"
             match(header[i]);
         match(TokenType.LeftBrace);
-        Program p1 = new Program(null,null);		//TEMPORARY STUB CODE FOR Declarations and Block for p1
-        match(TokenType.RightBrace);
+        Program p1 = new Program(declarations(),statements());		//TEMPORARY STUB CODE FOR Declarations and Block for p1
+        match(TokenType.RightBrace);								//NEEDS TESTIng
         return p1;								
     }
   
-    private Declarations declarations () {
+    private Declarations declarations() {
         // Declarations --> { Declaration }
-        return null;  // student exercise
+		Declarations d = new Declarations(); //Is an arrayList
+		while (token.type().equals(TokenType.Int) || token.type().equals(TokenType.Bool) || token.type().equals(TokenType.Float) || token.type().equals(TokenType.Char)){
+			Type t = type();
+			while (!(token.type().equals(TokenType.Semicolon))){
+				Variable v = new Variable(match(TokenType.Identifier));
+				d.add(new Declaration(v,t)); 		//NEEDS HELLA TESTINg
+				if (token.type().equals(TokenType.Comma)){
+					match(TokenType.Comma);
+				}
+			}
+			match(TokenType.Semicolon);
+		}
+		return d;
     }
   
-    private void declaration (Declarations ds) {
+	//I dont know that i need this method..so i might not use it 
+    private void declaration(Declarations ds) {
         // Declaration  --> Type Identifier { , Identifier } ;
         // student exercise
     }
@@ -60,23 +76,41 @@ public class Parser {
     private Type type () {
         // Type  -->  int | bool | float | char 
         Type t = null;
-        // student exercise
-        return t;          
+		if (token.type().equals(TokenType.Int)){
+			t = new Type(match(TokenType.Int));
+		} else if (token.type().equals(TokenType.Bool)){
+			t = new Type(match(TokenType.Bool));
+		} else if (token.type().equals(TokenType.Float)){
+			t = new Type(match(TokenType.Float));
+		} else if (token.type().equals(TokenType.Char)){
+			t = new Type(match(TokenType.Char));
+		} else { error("Undefine type in type()"); } //Error if is unmatched type
+        return t;    									
     }
   
     private Statement statement() {
         // Statement --> ; | Block | Assignment | IfStatement | WhileStatement
-        Statement s = new Skip();
-        // student exercise
-        return s;
+        Statement s = null;
+		if (token.type().equals(TokenType.LeftBrace)){
+			match(TokenType.LeftBrace);
+			s = statements();
+			match(TokenType.RightBrace);
+		} else if (token.type().equals(TokenType.Identifier)){
+			s = assignment();
+		} else if (token.type().equals(TokenType.If)){
+			s = ifStatement();
+		} else if (token.type().equals(TokenType.While)){
+			s = whileStatement();
+		} else { error("No matching statement type in statement()");} //Error if no statement type match	
+        return s;															//NEEDS TESTING
     }
   
     private Block statements () {
         // Block --> '{' Statements '}'
-        match(TokenType.LeftBrace);		//NEEDS TESTING
-		Block b = new Block();
-		match(TokenType.RightBrace);	//NEEDS TESTING
-        // student exercise
+		Block b = new Block();					//At the top level AST thinks block==statements, and they behave the same as long as we match the brackets 
+		while (!(token.type().equals(TokenType.RightBrace))){	
+			b.members.add(statement());
+		}
         return b;
     }
   
@@ -91,40 +125,76 @@ public class Parser {
   
     private Conditional ifStatement () {
         // IfStatement --> if ( Expression ) Statement [ else Statement ]
-        return null;  // student exercise
+        Conditional c;
+		match(TokenType.If);
+		match(TokenType.LeftParen);
+		Expression e = expression();
+		match(TokenType.RightParen);
+		Statement s = statement();
+		if (token.type().equals(TokenType.Else)){
+			match(TokenType.Else);
+			Statement elseS = statement();
+			c = new Conditional(e,s,elseS);
+		} else {
+			c = new Conditional(e,s);
+		}	
+		return c;  // NEEDS TESTING MIGHT NEED TO CATCH SEMICOLONS
     }
   
     private Loop whileStatement () {
         // WhileStatement --> while ( Expression ) Statement
-        return null;  // student exercise
+		Loop l;
+		match(TokenType.While);
+		match(TokenType.LeftParen);
+		Expression e = expression();
+		match(TokenType.RightParen);
+		Statement s = statement();
+		l = new Loop(e,s);
+        return l;  // NEEDS TESTINg
     }
 
     private Expression expression () {
         // Expression --> Conjunction { || Conjunction }
-		//Expression -> Term | AddOp Term
-
-		Expression e = term();
-		while (isAddOp()){
+		Expression e = conjunction();
+		while (token.type().equals(TokenType.Or)){
 			Operator op = new Operator(match(token.type()));
-			Expression term2 = factor();
-			e = new Binary(op, e, term2);
+			Expression e2 = conjunction();
+			e = new Binary(op,e,e2);
 		}
-        return e;						// TEMPORARY PASSTHEBUCK RETURN
+        return e;						// Needs testing
     }
   
     private Expression conjunction () {
         // Conjunction --> Equality { && Equality }
-        return (equality());						// TEMPORARY PASSTHEBUCK RETURN
+		Expression e = equality();
+		while (token.type().equals(TokenType.And)){
+			Operator op = new Operator(match(token.type()));
+			Expression e2 = equality();
+			e = new Binary(op,e,e2);
+		}
+        return e;						// Needs testing!
     }
   
     private Expression equality () {
         // Equality --> Relation [ EquOp Relation ]
-        return (relation());						// TEMPORARY PASSTHEBUCK RETURN
+		Expression e = relation();
+		while (isEqualityOp()){
+			Operator op = new Operator(match(token.type()));
+			Expression e2 = relation();
+			e = new Binary(op,e,e2);
+		}
+        return e;						// Needs testing
     }
 
     private Expression relation (){
         // Relation --> Addition [RelOp Addition] 
-        return (addition());						//TEMPORARY PASSTHEBUCK RETURN
+		Expression e = addition();
+		while (isRelationalOp()){
+			Operator op = new Operator(match(token.type()));
+			Expression e2 = addition();
+			e = new Binary(op,e,e2);
+		}
+        return e;						//Needs testing
     }
   
     private Expression addition () {
@@ -177,7 +247,7 @@ public class Parser {
             Expression term = expression();
             match(TokenType.RightParen);
             e = new Unary(op, term);
-        } else error("Identifier | Literal | ( | Type");
+        } else {error("primary must == Identifier | Literal | ( | Type");}
         return e;
     }
 
@@ -200,7 +270,7 @@ public class Parser {
 		} else if (token.type().equals(TokenType.True)){			//If is boolLoteral:True token
 			realVal = new BoolValue(true);
 		} else {
-			error("No literal value for that value");
+			error("No maching literal type");
 			realVal = null;						//returns a null object if none of the literal types are found 
 		}
         return realVal;  									//This works now 

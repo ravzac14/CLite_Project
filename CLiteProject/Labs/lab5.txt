@@ -1,0 +1,3 @@
+Zack Raver;ravzac14
+
+Finally finished the AST.java, added display methods to basically everyone, using the needed indentation as an int parameter to all the methods (except program's display)

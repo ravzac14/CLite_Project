@@ -3,18 +3,28 @@
 
 import java.util.*;
 
+
 class Program {
     // Program = Declarations decpart ; Block body
     Declarations decpart;
     Block body;
-
+	
     Program (Declarations d, Block b) {
         decpart = d;
         body = b;
 	}
 	
 	public void display(){
-		System.out.println("Display abstract syntax tree");		//TEMPORARY STUB CODE FOR display() METHOD
+		System.out.println("Begin parsing...NAME EVENTUALLY HERE\n");
+		System.out.println("Declarations:");
+		System.out.println("  Declarations = {");
+		for(Declaration d : decpart){
+			d.display(); 	//this one is hardcoded
+		}
+		System.out.println("  }");
+		System.out.println("Block:");
+		body.display(2);	//2 is the initial # of spaces of the ind	
+//		System.out.print("  ");
 	}
 
 }
@@ -22,7 +32,7 @@ class Program {
 class Declarations extends ArrayList<Declaration> {
     // Declarations = Declaration*
     // (a list of declarations d1, d2, ..., dn)
-
+	
 }
 
 class Declaration {
@@ -33,7 +43,10 @@ class Declaration {
     Declaration (Variable var, Type type) {
         v = var; t = type;
     } // declaration */
-
+	
+	public void display(){
+		System.out.println("    <" + v + ", " + t + ">");
+	}
 }
 
 class Type {
@@ -46,24 +59,34 @@ class Type {
     
     private String id;
 
-    private Type (String t) { id = t; }
+    Type (String t) { id = t; }
 
     public String toString ( ) { return id; }
 }
 
 abstract class Statement {
     // Statement = Skip | Block | Assignment | Conditional | Loop
-
+	
+	abstract void display(int ind);
 }
 
 class Skip extends Statement {
+
+	public void display(int ind){
+		System.out.print("");
+	}
 }
 
 class Block extends Statement {
     // Block = Statement*
     //         (a Vector of members)
     public ArrayList<Statement> members = new ArrayList<Statement>();
-
+	
+	public void display(int ind){
+		for (Statement s : members){
+			s.display(2 + ind);
+		}
+	}
 }
 
 class Assignment extends Statement {
@@ -75,7 +98,15 @@ class Assignment extends Statement {
         target = t;
         source = e;
     }
-
+	
+	public void display(int ind){
+		for (int i = 0; i < ind; i++){
+			System.out.print(" ");
+		}	
+		System.out.print("Assignment:\n");
+		target.display(2 + ind);
+		source.display(2 + ind);
+	}
 }
 
 class Conditional extends Statement {
@@ -92,6 +123,23 @@ class Conditional extends Statement {
         test = t; thenbranch = tp; elsebranch = ep;
     }
     
+	public void display(int ind){
+		for (int i = 0; i < ind; i++){
+			System.out.print(" ");
+		}
+		System.out.print("Conditional:\n");
+		test.display(2 + ind);
+		for (int i = 0; i < (2 + ind); i++){
+			System.out.print(" ");
+		}
+		System.out.print("Then Branch:\n");
+		thenbranch.display(2 + ind);
+		for (int i = 0; i < (2 + ind); i++){
+			System.out.print(" ");
+		}
+		System.out.print("Else Branch?:\n");
+		elsebranch.display(2 + ind);
+	}
 }
 
 class Loop extends Statement {
@@ -103,11 +151,24 @@ class Loop extends Statement {
         test = t; body = b;
     }
     
+	public void display(int ind){
+		for (int i = 0; i < ind; i++){
+			System.out.print(" ");
+		}
+		System.out.print("Loop:\n");
+		test.display(2 + ind);
+		for (int i = 0; i < (2 + ind); i++){
+			System.out.print(" ");
+		}
+		System.out.print("Block:\n");
+		body.display(2 + ind);
+	}
 }
 
 abstract class Expression {
     // Expression = Variable | Value | Binary | Unary
-
+	
+	abstract void display(int ind);
 }
 
 class Variable extends Expression {
@@ -124,7 +185,13 @@ class Variable extends Expression {
     }
     
     public int hashCode ( ) { return id.hashCode( ); }
-
+	
+	public void display(int ind){
+		for (int i = 0; i < ind; i++){
+			System.out.print(" ");
+		}
+		System.out.print("Variable: " + id + "\n");
+	}
 }
 
 abstract class Value extends Expression {
@@ -164,6 +231,10 @@ abstract class Value extends Expression {
         if (type == Type.FLOAT) return new FloatValue( );
         throw new IllegalArgumentException("Illegal type in mkValue");
     }
+
+	public void display(int ind){
+		System.out.println("In Value, shouldnt display right?");
+	}
 }
 
 class IntValue extends Value {
@@ -182,7 +253,13 @@ class IntValue extends Value {
         if (undef)  return "undef";
         return "" + value;
     }
-
+	
+	public void display(int ind){
+		for (int i = 0; i < ind; i++){
+			System.out.print(" ");
+		}
+		System.out.print("IntValue: " + value + "\n");
+	}
 }
 
 class BoolValue extends Value {
@@ -207,6 +284,12 @@ class BoolValue extends Value {
         return "" + value;
     }
 
+	public void display(int ind){
+		for (int i = 0; i < ind; i++){
+			System.out.print(" ");
+		}
+		System.out.print("BoolValue: " + value + "\n");
+	}
 }
 
 class CharValue extends Value {
@@ -226,6 +309,12 @@ class CharValue extends Value {
         return "" + value;
     }
 
+	public void display(int ind){
+		for (int i = 0; i < ind; i++){
+			System.out.print(" ");
+		}
+		System.out.print("CharValue: " + value + "\n");
+	}
 }
 
 class FloatValue extends Value {
@@ -245,6 +334,12 @@ class FloatValue extends Value {
         return "" + value;
     }
 
+	public void display(int ind){
+		for (int i = 0; i < ind; i++){
+			System.out.print(" ");
+		}
+		System.out.print("FloatValue: " + value + "\n");
+	}
 }
 
 class Binary extends Expression {
@@ -256,6 +351,15 @@ class Binary extends Expression {
         op = o; term1 = l; term2 = r;
     } // binary
 
+	public void display(int ind){
+		for (int i = 0; i < ind; i++){
+			System.out.print(" ");
+		}
+		System.out.print("Binary:\n");
+		op.display(2 + ind);
+		term1.display(2 + ind);
+		term2.display(2 + ind);
+	}
 }
 
 class Unary extends Expression {
@@ -267,6 +371,14 @@ class Unary extends Expression {
         op = o; term = e;
     } // unary
 
+	public void display(int ind){
+		for (int i = 0; i < ind; i++){
+			System.out.print(" ");
+		}
+		System.out.print("Unary:\n");
+		op.display(2 + ind);
+		term.display(2 + ind);
+	}
 }
 
 class Operator {
@@ -414,5 +526,11 @@ class Operator {
     final static public Operator boolMap (String op) {
         return map (boolMap, op);
     }
-
+	
+	public void display(int ind){
+		for (int i = 0; i < ind; i++){
+			System.out.print(" ");
+		}
+		System.out.print("Operator: " + val + "\n");
+	}
 }

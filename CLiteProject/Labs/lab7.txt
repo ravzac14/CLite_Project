@@ -1,0 +1,5 @@
+Zack Raver;ravzac14
+
+Finished up the rest of the parser..which was statement() and alll the expression-returners
+
+Tested it on all the samples and it returns "Print abstract syntax tree", because i haven't done lab 6 yet!
