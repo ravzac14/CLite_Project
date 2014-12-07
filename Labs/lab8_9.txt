@@ -1,0 +1,4 @@
+Zack Raver; ravzac14
+due wk 9
+
+For this lab I added a display method to TypeMap.java and added the cases for V(Statement.. and V(Expression..

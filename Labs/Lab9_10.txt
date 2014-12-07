@@ -1,0 +1,14 @@
+Zack Raver; ravzac14
+due wk 10
+
+Finished the type checker (for real) and the semantic interpreter!
+
+So the type checker had a bunch of bugs that all stemmed from trying to say Type1 == Type2, which is never true
+in Java unless they are the same object...(the pre-existing code has several instances of this)..so I wrote an
+equals() method for Type...which just compared their Type.id's and replaced anytime i saw Type1 ==...with
+Type1.equals(...
+
+The interpeter was much simpler..just cases for all the operations. I noticed that bool has LT/LE/GT/GE which 
+shouldn't work so I just threw and exception if they came up
+
+Yay!
