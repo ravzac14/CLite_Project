@@ -62,10 +62,8 @@ class Type {
 
     public String toString ( ) { return id; }
 
-	public Boolean equals(Type test){
-		if (this.id.equals(test.id)) return true;
-		return false;
-	}
+	//This didn't exist in the original source code ... -.-
+	public Boolean equals(Type test){ return this.id.equals(test.id)); }
 }
 
 abstract class Statement {

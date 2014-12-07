@@ -45,8 +45,8 @@ public class Parser {
         for (int i=0; i<header.length; i++)   // bypass "int main ( )"
             match(header[i]);
         match(TokenType.LeftBrace);
-        Program p1 = new Program(declarations(),statements());		//TEMPORARY STUB CODE FOR Declarations and Block for p1
-        match(TokenType.RightBrace);								//NEEDS TESTIng
+        Program p1 = new Program(declarations(),statements());
+        match(TokenType.RightBrace);		
         return p1;								
     }
   
@@ -57,7 +57,7 @@ public class Parser {
 			Type t = type();
 			while (!(token.type().equals(TokenType.Semicolon))){
 				Variable v = new Variable(match(TokenType.Identifier));
-				d.add(new Declaration(v,t)); 		//NEEDS HELLA TESTINg
+				d.add(new Declaration(v,t)); 	
 				if (token.type().equals(TokenType.Comma)){
 					match(TokenType.Comma);
 				}
@@ -67,11 +67,7 @@ public class Parser {
 		return d;
     }
   
-	//I dont know that i need this method..so i might not use it 
-    private void declaration(Declarations ds) {
-        // Declaration  --> Type Identifier { , Identifier } ;
-        // student exercise
-    }
+	//Didnt use declaration() just did it all in declarations()
   
     private Type type () {
         // Type  -->  int | bool | float | char 
@@ -102,12 +98,12 @@ public class Parser {
 		} else if (token.type().equals(TokenType.While)){
 			s = whileStatement();
 		} else { error("No matching statement type in statement()");} //Error if no statement type match	
-        return s;															//NEEDS TESTING
+        return s;											
     }
   
     private Block statements () {
         // Block --> '{' Statements '}'
-		Block b = new Block();					//At the top level AST thinks block==statements, and they behave the same as long as we match the brackets 
+		Block b = new Block();					//At the top level AST thinks block==statements, and they behave the same
 		while (!(token.type().equals(TokenType.RightBrace))){	
 			b.members.add(statement());
 		}
@@ -138,7 +134,7 @@ public class Parser {
 		} else {
 			c = new Conditional(e,s);
 		}	
-		return c;  // NEEDS TESTING MIGHT NEED TO CATCH SEMICOLONS
+		return c;  
     }
   
     private Loop whileStatement () {
@@ -150,7 +146,7 @@ public class Parser {
 		match(TokenType.RightParen);
 		Statement s = statement();
 		l = new Loop(e,s);
-        return l;  // NEEDS TESTINg
+        return l; 
     }
 
     private Expression expression () {
@@ -161,7 +157,7 @@ public class Parser {
 			Expression e2 = conjunction();
 			e = new Binary(op,e,e2);
 		}
-        return e;						// Needs testing
+        return e;
     }
   
     private Expression conjunction () {
@@ -172,7 +168,7 @@ public class Parser {
 			Expression e2 = equality();
 			e = new Binary(op,e,e2);
 		}
-        return e;						// Needs testing!
+        return e;			
     }
   
     private Expression equality () {
@@ -183,7 +179,7 @@ public class Parser {
 			Expression e2 = relation();
 			e = new Binary(op,e,e2);
 		}
-        return e;						// Needs testing
+        return e;				
     }
 
     private Expression relation (){
@@ -194,7 +190,7 @@ public class Parser {
 			Expression e2 = addition();
 			e = new Binary(op,e,e2);
 		}
-        return e;						//Needs testing
+        return e;	
     }
   
     private Expression addition () {
@@ -273,7 +269,7 @@ public class Parser {
 			error("No maching literal type");
 			realVal = null;						//returns a null object if none of the literal types are found 
 		}
-        return realVal;  									//This works now 
+        return realVal;  						
     }
   
 
@@ -328,7 +324,7 @@ public class Parser {
         Parser parser  = new Parser(new Lexer(args[0]));
         Program prog = parser.program();
 		System.out.println("Begin Parsing..." + myProg);
-        prog.display();           // display abstract syntax tree
+        prog.display();           // display abstract syntax tree for testing Parser alone
     } //main
 
 } // Parser

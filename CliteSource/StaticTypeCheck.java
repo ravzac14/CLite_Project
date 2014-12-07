@@ -179,7 +179,7 @@ public class StaticTypeCheck {
     public static void main(String args[]) {
         Parser parser  = new Parser(new Lexer(args[0]));
         Program prog = parser.program();
-        //prog.display();           // This also happens in Parser
+        prog.display();           // This also happens in Parser
         System.out.println("\nBegin type checking...");
         TypeMap map = typing(prog.decpart);
         map.display();   
