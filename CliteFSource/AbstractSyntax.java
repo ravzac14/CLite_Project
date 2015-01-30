@@ -5,7 +5,10 @@ import java.util.*;
 
 
 class Program {
-    // Program = Declarations decpart ; Block body
+    // CLite:   Program = Declarations decpart ; Block body
+    // CliteF:  Program = Declarations global ; Functions functions
+    //TODO: Update for CliteF
+
     Declarations decpart;
     Block body;
 	
@@ -14,6 +17,7 @@ class Program {
         body = b;
 	}
 	
+    //TODO: Change this for CliteF Program
 	public void display(){
 		System.out.println("Program (abstract syntrax):");
 		System.out.println("  Declarations:");
@@ -26,6 +30,22 @@ class Program {
 		body.display(2);	//2 is the initial # of spaces of the ind	
 	}
 
+}
+
+class Functions extends ArrayList<Function> {
+    //Functions = Function*
+    //a list of functions f1, f2, ..., fn
+}
+
+class Function {
+    //Function = Type t; String id; Declarations params, locals; Block body
+    Type t;
+    String id;
+    Declarations params;
+    Declarations locals;
+    Block body;
+    //TODO:Add logic and helper methods
+    //TODO:Add display methods
 }
 
 class Declarations extends ArrayList<Declaration> {
@@ -49,11 +69,14 @@ class Declaration {
 }
 
 class Type {
-    // Type = int | bool | char | float 
+    // Clite:   Type = int | bool | char | float 
+    // CliteF:  Type = int | bool | char | float | void
+    //TODO: Test that this was all that was needed
     final static Type INT = new Type("int");
     final static Type BOOL = new Type("bool");
     final static Type CHAR = new Type("char");
     final static Type FLOAT = new Type("float");
+    final static Type VOID = new Type("void");
     // final static Type UNDEFINED = new Type("undef");
     
     private String id;
@@ -62,13 +85,13 @@ class Type {
 
     public String toString ( ) { return id; }
 
-	//This didn't exist in the original source code ... -.-
+	//NOTE:This didn't exist in the original source code ... -.-
 	public Boolean equals(Type test){ return this.id.equals(test.id); }
 }
 
 abstract class Statement {
-    // Statement = Skip | Block | Assignment | Conditional | Loop
-	
+    // CLite:   Statement = Skip | Block | Assignment | Conditional | Loop
+	// CliteF:  Statement = Skip | Block | Assignment | Conditional | Loop | Call | Return
 	abstract void display(int ind);
 }
 
@@ -167,9 +190,30 @@ class Loop extends Statement {
 	}
 }
 
+class CallS extends Statement {
+    // CallS = String name; Expressions args
+    String name;
+    Expressions args;
+    //TODO: Add any logic/helper methods
+    //TODO: Add a display method
+}
+
+class Return extends Statement {
+    // Return = Variable target; Expression result
+    Variable target;
+    Expression result;
+    //TODO: Add any logic/helper methods
+    //TODO: Add a display method
+}
+
+class Expressions extends ArrayList<Expression> {
+    //Expressions = Expresson*
+    //Just a list of expressions e1, e2, ..., en
+}
+
 abstract class Expression {
-    // Expression = Variable | Value | Binary | Unary
-	
+    // Clite:   Expression = Variable | Value | Binary | Unary
+	// CliteF:  Expression = Variable | Value | Binaru | Unary | Call
 	abstract void display(int ind);
 }
 
@@ -381,6 +425,14 @@ class Unary extends Expression {
 		op.display(2 + ind);
 		term.display(2 + ind);
 	}
+}
+
+class CallE extends Statement {
+    // CallE = String name; Expressions args
+    String name;
+    Expressions args;
+    //TODO: Add any logic/helper methods
+    //TODO: Add a display method
 }
 
 class Operator {

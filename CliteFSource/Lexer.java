@@ -174,8 +174,8 @@ public class Lexer {
 		} else {
 			ch = c;
 			return one;
-		}
-    }
+		} //else
+    } //chkOpt
 
     private String concat(String set) {
         String r = "";
