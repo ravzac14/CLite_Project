@@ -7,17 +7,17 @@ import java.util.*;
 class Program {
     // CLite:   Program = Declarations decpart ; Block body
     // CliteF:  Program = Declarations global ; Functions functions
-    //TODO: Update for CliteF
+    //TODO: Test for CliteF
 
     Declarations decpart;
-    Block body;
-	
-    Program (Declarations d, Block b) {
-        decpart = d;
-        body = b;
+	Functions functions;    //Arraylist of functions
+
+    Program (Declarations ds, Functions fs) {
+        decpart = ds;
+        functions = fs;
 	}
 	
-    //TODO: Change this for CliteF Program
+    //TODO: Test for CliteF Program
 	public void display(){
 		System.out.println("Program (abstract syntrax):");
 		System.out.println("  Declarations:");
@@ -26,8 +26,10 @@ class Program {
 			d.display(); 	//this one is hardcoded
 		}
 		System.out.println("    }");
-		System.out.println("  Block:");
-		body.display(2);	//2 is the initial # of spaces of the ind	
+		System.out.println("  Functions:");
+		for(Function f : functions){
+			f.display(2); 	//this one is hardcoded
+		}
 	}
 
 }
@@ -44,8 +46,46 @@ class Function {
     Declarations params;
     Declarations locals;
     Block body;
-    //TODO:Add logic and helper methods
-    //TODO:Add display methods
+    
+    //TODO:Add MORE? logic and helper methods
+    Function (Type type, String name, Declarations parameters, Declarations localss, Block functionBody){
+        t = type;
+        id = name;
+        params = parameters;
+        locals = localss;
+        body = functionBody;
+    }
+
+    Type getType() { return t; }
+
+    void setType(Type newtype) { t = newtype; }
+
+    String getID() { return id; }
+
+    void setID(String newID) { id = newID; }
+
+    //TODO: Test display method
+    display(int ind){
+        for (int i = 0; i < ind; i++){
+            System.out.print(" ");
+        }
+        System.out.println(type+" "+id+": "); 
+        for (int i = 0; i < ind; i++){
+            System.out.print(" ");
+        }
+        System.out.println("Parameters: ");
+        params.display(ind + 2);
+        for (int i = 0; i < ind; i++){
+            System.out.print(" ");
+        }
+        System.out.println("Declarations local to "+id+": ");
+        locals.display(ind + 2);
+        for (int i = 0; i < ind; i++){
+            System.out.print(" ");
+        }
+        System.out.println(id+"'s Body: ");
+        body.display(ind + 2);
+    }
 }
 
 class Declarations extends ArrayList<Declaration> {
@@ -194,7 +234,16 @@ class CallS extends Statement {
     // CallS = String name; Expressions args
     String name;
     Expressions args;
-    //TODO: Add any logic/helper methods
+
+    //TODO: Add any MORE? logic/helper methods
+    CallS(String newName, Expressions arguments){
+        name = newName;
+        args = arguments;
+    }
+
+    String getName() { return name; }
+    void setName(String newName) { name = newName; }
+
     //TODO: Add a display method
 }
 
