@@ -1,0 +1,246 @@
+Zack Raver; ravzac14
+PLD/Functional DS Midterm Winter 15
+
+Wasn't sure how much coding you wanted (or how accurate) but i think most of this
+is really close to the actual (runnable) code.
+
+******************************************************************************
+1. Give two denitions of a set, including only the behaviors
+member,insert, and remove:
+******************************************************************************
+    a.As a abstract data type in java.
+******************************************************************************
+public class MySet{
+
+    private ArrayList<t> members;
+    private int currentIndex;
+
+    public MySet(){
+        members = new ArrayList<t>();
+        currentIndex = 0;
+    }
+
+    public MySet(Object o1, Object o2,...){
+        members = new ArrayList<t>(args.asList());      //Or something like that
+    }
+
+    public boolean member(Object testObject){
+        for (Object o : members){
+            if (o.equals(testObject)){ return true; }   //Is in the set
+        }
+        return false;
+    }
+
+    public void insert(Object insertO){
+        for (Object o : members){
+            if (insertO.equals(o)){ break; }        //ie is already in the set, and doesn't need to be added
+        }
+        members.add(insertO);   //otherwise add it to the set
+    }
+
+    public void remove(Object removeO){
+        for (Object o : members){
+            if (removeO.equals(o)){ 
+                members.remove(removeO);        
+            }                   //if is equal to, remove it and break, otherwise nothing happens
+        }
+    }
+}
+
+
+******************************************************************************
+    b. As an algebraic data type in haskell
+******************************************************************************
+
+data MySet a = Empty | SetC a (MySet a)
+
+empty = Empty
+
+member n (Empty)      = False
+member n (SetC x xs)  
+    | n == x      = True
+    | otherwise   = member n xs
+
+insert n xs     = if n `member` xs then xs else (n:xs)
+
+remove n (Empty)     = Empty
+remove n (SetC x xs) 
+    | n == x    = xs
+    | otherwise = SetC x (remove n xs)
+
+
+******************************************************************************
+2. In the previous problem, if you now want to add the behaviors
+union ,intersect, and seteq,what code would you need to add and/or change for each of your denitions.
+******************************************************************************
+
+******************************************************************************
+    a. For abstract data type in java
+******************************************************************************
+
+You'd have to constructors taking two (or more) sets, and the iterate through each set doing comparisons
+on membership (if you don't want duplicates). So for union, you'd iterate through the first list, if it was a 
+member of the second you'd add it, and remove it from the second, else you'd add it and do nothing. Then you add 
+the second list(set). All of these would be much faster (especially seteq) if I also added a sort method, that ran after 
+during construction, and also smart inserted into the set.
+
+
+******************************************************************************
+    b. For algebraic data type in haskell
+******************************************************************************
+
+This would be similar to above..I'd start out by assuring the lists were sorted, then you'd iterate through
+the second list, and if it's a `member` of the first return the first plus the remaining second, else you
+construct a new list with in place of the first (which is just the new element plus the whole first list), etc.
+
+Seteq would be easy here because you could just deconstruct both sets simultaneously and fail if they ever
+differ.
+
+
+******************************************************************************
+3. What qualified type do you need for your set implementation? Create a new set implemen-
+tation that relies on a characteristic function. What qualied type do you need for your
+new set?
+******************************************************************************
+
+My current implementation of either of the sets require 'a' (as in 'Set a') to support equivalence. If 
+i were to sort the set, they would also need to be ordered.
+
+data MySet a = Empty | Set a (MySet a) deriving (Eq, Ord)
+
+-or-
+
+data (Eq a, Ord a) => MySet a = Empty | Set a (MySet a) 
+
+
+******************************************************************************
+4. Enter the following sequence into a red-black tree. Show the tree after each insertion.
+1;2;3;4;5;9;8;7;6
+******************************************************************************
+
+NOTE: this traces/uses the implementation of rbtree you gave us in hw2
+
+**Inserting 1; makes 1 the root (as black) with two empty children
+RBT B RB_E 1 RB_E
+
+**Inserting 2; makes 2 the right child of 1 (as red) with two empty children
+RBT B RB_E 1 (RBT R RB_E 2 RB_E)
+
+**Inserting 3; ROTATES, makes 2 the root (as black), with left child 1 (as black), and righy child 3 (as black) each with two empty children
+RBT B (RBT B RB_E 1 RB_E) 2 (RBT B RB_E 3 RB_E)
+
+**Inserting 4; makes 4 the right child of 3 (as red), with two empty children
+RBT B (RBT B RB_E 1 RB_E) 2 (RBT B RB_E 3 (RBT R RB_E 4 RB_E))
+
+**Inserting 5; makes 5 the right child of 4 (as black) with two empty children
+RBT B (RBT B RB_E 1 RB_E) 2 (RBT R (RBT B RB_E 3 RB_E) 4 (RBT B RB_E 5 RB_E))
+
+**Inserting 9; makes 9 the right child of 5 (as red) with two empty children
+RBT B (RBT B RB_E 1 RB_E) 2 (RBT R (RBT B RB_E 3 RB_E) 4 (RBT B RB_E 5 (RBT R RB_E 9 RB_E)))
+
+**Inserting 8; ROTATES, makes 4 the root (as black), with left subtree (1B < 2B < 3B) and the right subtree (5B < 8B < 9B)
+RBT B (RBT B (RBT B RB_E 1 RB_E) 2 (RBT B RB_E 3 RB_E)) 4 (RBT B (RBT B RB_E 5 RB_E) 8 (RBT B RB_E 9 RB_E))
+
+**Inserting 7; Adds 7 as the right child (as red) of 5, with two empty children
+RBT B (RBT B (RBT B RB_E 1 RB_E) 2 (RBT B RB_E 3 RB_E)) 4 (RBT B (RBT B RB_E 5 (RBT R RB_E 7 RB_E)) 8 (RBT B RB_E 9 RB_E))
+
+**Inserting 6; ROTATES, replacing 5 with 6 (as red) as the left child of 8, with children 5B and 7B 
+RBT B (RBT B (RBT B RB_E 1 RB_E) 2 (RBT B RB_E 3 RB_E)) 4 (RBT B (RBT R (RBT B RB_E 5 RB_E) 6 (RBT B RB_E 7 RB_E)) 8 (RBT B RB_E 9 RB_E))
+
+
+******************************************************************************
+5. Using the paired list introduced in the lecture notes, write the following functions:
+******************************************************************************
+
+list = ListC [n0,n1...] [nk,nk-1,...]
+
+I know that isn't syntactically correct, but that's the idea
+
+Not going to write the overhead of the lists 'balancing', moving from the back to the front...
+The idea is things are added to the back list, and when the front list is empty, the back list is moved
+in bulk to the front list.
+
+
+******************************************************************************
+    a.  append two lists
+******************************************************************************
+
+append a@(ListC [] []) b@(ListC _ _)            = b
+append a@(ListC _ _) b@(ListC [] [])            = a
+append (ListC (us) (vs)) (ListC (x:xs) (ys))    = append (balance (ListC (us) (x:vs))) (balance (ListC (xs) (ys)))
+
+where balance only moves from the back list to the front, if the front is empty..so it doesnt always do something
+
+
+******************************************************************************
+    b. take the length of a list.
+******************************************************************************
+    
+length (ListC xs ys) = (length xs) + (length ys)
+
+
+******************************************************************************
+    c.  fold on the paired list
+******************************************************************************
+
+fold f (ListC [] []) x              = x
+fold f (ListC [] ys) x              = fold f (balance (ListC [] ys)) x
+fold f (ListC (z:zs) ys) x          = fold f (ListC zs ys) (f z x)
+
+basically, if you've emptied the list, the acc has your answer..if the left list is empty,
+balance it. Otherwise pull from the head (the front list) apply the function to the head and the acc,
+and continue folding. 
+
+
+******************************************************************************
+    d. map on the paired list
+******************************************************************************
+
+map f (ListC xs ys) = ListC (map f xs) (map f ys)
+
+map each list individually
+
+******************************************************************************
+    e.  reverse on the paired list
+******************************************************************************
+
+reverse (ListC xs ys)   = ListC ys xs
+
+swap the front list and the back list (i think this works?)
+
+
+******************************************************************************
+6. Analyze the above implementations for their big O (just count the number of "cons"
+operations). Compare them to the big O of a tradition list implementation.
+******************************************************************************
+
+Append: The would have an amortized cost of n..where the movement of one elemnt of one list to 
+another costs 2 Cons (1 is assumed for the balancing of the list, as you pull from it). It's not
+2n because you only have to move 1 list
+
+Traditional append: would cost n^2 (where n is the size of the 2nd list) because it has to use ++, which 
+breaks down and re-assembles the list everytime
+
+
+Length: Just costs n, because you're independently taking the length of the front list and back list
+and adding those totals...
+
+Traditional Length: Not much different here
+
+
+Fold: This also has an amortized cost of 2n (where n is the size of xs + ys).  Because each fold iteration only takes 1 Cons
+and the balancing assumes to take 1 cons per element. 
+
+Traditional Fold: Should only take n cons...because you're constantly cutting the head off the list?
+
+
+Map: Takes n actions (where n is xs + ys), as it maps down the front list and back list individually
+
+Traditional Map: Should be the same..
+
+
+Reverse: I'm not sure how long this'd actually take in haskell..assumedly if it's building up the new double list, it'd 
+take n (where n is xs + ys) because its grabbing them one at a time...but i think pattern matching speeds this up
+
+Traditional Reveres: Takes nlogn time? because it has to break off the head, ++ it the new list...which it remakes everytime you
+call ++
