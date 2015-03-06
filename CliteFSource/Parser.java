@@ -42,41 +42,78 @@ public class Parser {
 		// Decs = arraylist<dec>
 		// Body = block = arraylist<statements>
         //CliteF:
-        // Program --> Decs F1{Decs Stmts}...FN{Decs stmts} -- where FJ is "int main(){...}" where 0 <= J <= N
-        //TODO:Update this to work with CliteF (The header doesnt exist anymore, global decs, functions, etc...)
-        TokenType[ ] header = {TokenType.Int, TokenType.Main,
-                          TokenType.LeftParen, TokenType.RightParen};
-        for (int i=0; i<header.length; i++)   // bypass "int main ( )"
-            match(header[i]);
-        match(TokenType.LeftBrace);
-        Program p1 = new Program(declarations(),statements());
-        match(TokenType.RightBrace);		
+        // Program -->  Decs 
+        //              Fun1{Decs Stmts}...FunN{Decs stmts} -- where FunJ is "int main(){...}" where 0 <= J <= N
+        //TODO:Test
+        Program p1 = new Program(declarations());
         return p1;								
     }
   
     private Declarations declarations() {
         // Declarations --> { Declaration }
 		Declarations d = new Declarations(); 
-		while (token.type().equals(TokenType.Int) 
+		Type t;
+        String s;
+        while (token.type().equals(TokenType.Int) 
                 || token.type().equals(TokenType.Bool) 
                 || token.type().equals(TokenType.Float) 
-                || token.type().equals(TokenType.Char) 
+                || token.type().equals(TokenType.Char)
                 || token.type().equals(TokenType.Void)){
-			Type t = type();
-			while (!(token.type().equals(TokenType.Semicolon))){
-				Variable v = new Variable(match(TokenType.Identifier));
-				d.add(new Declaration(v,t)); 	
-				if (token.type().equals(TokenType.Comma)){
-					match(TokenType.Comma);
-				}
+			t = type();
+			while (!((token.type().equals(TokenType.Semicolon)) 
+                    || (token.type().equals(TokenType.RightBrace))
+                    || (token.type().equals(TokenType.RightParen))
+                    || (token.type().equals(TokenType.Return))
+                    || (token.type().equals(TokenType.While))
+                    || (token.type().equals(TokenType.If))
+                    || (token.type().equals(TokenType.Main)))){
+                s = match(TokenType.Identifier);
+				if (token.type().equals(TokenType.LeftParen)){ //if its a left paren, its a function dec.
+                    d.add(function(t,s));
+                } else {    //Else it's a regular variable declaration
+                    Variable v = new Variable(s);
+                    d.add(new VarDeclaration(v,t)); 	
+				    if (token.type().equals(TokenType.Comma)){
+					    match(TokenType.Comma);
+				    }
+                    if (token.type().equals(TokenType.Int) //For arguments 
+                        || token.type().equals(TokenType.Bool) 
+                        || token.type().equals(TokenType.Float) 
+                        || token.type().equals(TokenType.Char)
+                        || token.type().equals(TokenType.Void)){ 
+                    t = type();
+                    }
+                    if (token.type().equals(TokenType.Assign)){
+                        assignment(s);
+                    }
+                }
 			}
-			match(TokenType.Semicolon);
+			if (token.type().equals(TokenType.Semicolon)){ match(TokenType.Semicolon); }
+            if (token.type().equals(TokenType.RightBrace)){ match(TokenType.RightBrace); }
+            if (token.type().equals(TokenType.Main)){ 
+                s = match(TokenType.Main);
+                d.add(function(t,s));
+            }
 		}
 		return d;
     }
   
 	//Didnt use declaration() just did it all in declarations()
   
+    //TODO: add functions() function()?
+
+    private Function function(Type t, String id){
+        Function f;
+        match(TokenType.LeftParen);
+        Declarations args = declarations();
+        match(TokenType.RightParen);
+        match(TokenType.LeftBrace);
+        Declarations locals = declarations();
+        Block b = statements();
+        f = new Function(t,id,args,locals,b);
+        return f;
+    }
+
     private Type type () {
         // Clite:   Type  -->  int | bool | float | char 
         // CliteF:  Type  --> int | bool |float | char | void
@@ -98,18 +135,25 @@ public class Parser {
     private Statement statement() {
         // Clite:   Statement --> ; | Block | Assignment | IfStatement | WhileStatement
         // CliteF:  Statement --> ; | Block | Assignment | IfStatement | WhileStatement | CallStatement | ReturnStatement
-        //TODO: Figure out how best to add the logic for choosing CallStatement and ReturnStatement
+        //TODO:Test  
         Statement s = null;
 		if (token.type().equals(TokenType.LeftBrace)){
 			match(TokenType.LeftBrace);
 			s = statements();
 			match(TokenType.RightBrace);
 		} else if (token.type().equals(TokenType.Identifier)){
-			s = assignment();
+            String id = match(TokenType.Identifier);
+			if (token.type().equals(TokenType.LeftParen)){
+                s = callStatement(id);
+            } else {
+                s = assignment(id);
+            }
 		} else if (token.type().equals(TokenType.If)){
 			s = ifStatement();
 		} else if (token.type().equals(TokenType.While)){
 			s = whileStatement();
+        } else if (token.type().equals(TokenType.Return)){
+            s = returnStatement();
 		} else { error("No matching statement type in statement()");} //Error if no statement type match	
         return s;											
     }
@@ -123,9 +167,9 @@ public class Parser {
         return b;
     }
   
-    private Assignment assignment () {
+    private Assignment assignment (String id) {
         // Assignment --> Identifier = Expression ;
-        Variable target = new Variable(match(TokenType.Identifier));
+        Variable target = new Variable(id);
 		match(TokenType.Assign);
 		Expression source = expression();
 		match(TokenType.Semicolon);
@@ -162,17 +206,41 @@ public class Parser {
         return l; 
     }
 
-    private CallS callStatement () {
-        //TODO:What to do here
+    private CallS callStatement (String id) {
+        //TODO:TEST
+        String name = id;
+        match(TokenType.LeftParen);
+        Expressions exps = expressions();
+        match(TokenType.RightParen);
+        match(TokenType.Semicolon);
+        return (new CallS(name,exps));
     }
 
     private Return returnStatement () {
-        //TODO: What to do here
+        //TODO: TEST 
+        // either you can use return statements in void functions (which would allow non-targetted returns) in addition to the two cases below 
+        //      OR you can only use returns in non-void functions (which can be use in a CallE (ie has a target) or in a CallS (no target))
+        Return r;
+        match(TokenType.Return);
+        r = new Return(expression());
+        match(TokenType.Semicolon);
+        return r;
     }
 
-    //TODO: Add stuff for Expressions
+    //TODO: TEST
+    private Expressions expressions(){
+        //A list of Expression(s)
+        //"(" Expression(s) ")" comma delimited
+        Expressions es = new Expressions();
+        while (!(token.type().equals(TokenType.RightParen))){
+            es.add(expression());
+            if (token.type().equals(TokenType.Comma)){
+                match(TokenType.Comma);
+            }
+        }
+        return es;
+    }
 
-    //TODO: Expression uses this sort of waterfall to figure out which expression to call (so how do we add CallE 
     private Expression expression () {
         // Expression --> Conjunction { || Conjunction }
 		Expression e = conjunction();
@@ -250,11 +318,20 @@ public class Parser {
     }
   
     private Expression primary () {
-        // Primary --> Identifier | Literal | ( Expression )
+        // Primary --> Identifier [( Expressions )]| Literal | ( Expression )
         //             | Type ( Expression )
+        //TODO: TEST
         Expression e = null;
         if (token.type().equals(TokenType.Identifier)) {
-            e = new Variable(match(TokenType.Identifier));
+            String s = match(TokenType.Identifier);
+            if (token.type().equals(TokenType.LeftParen)){
+                match(TokenType.LeftParen);
+                Expressions exps = expressions();
+                match(TokenType.RightParen);
+                e = new CallE(s,exps);
+            } else {
+                e = new Variable(s);
+            }
         } else if (isLiteral()) {
             e = literal();
         } else if (token.type().equals(TokenType.LeftParen)) {

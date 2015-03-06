@@ -8,6 +8,10 @@ void A(int x, int y) {
     bool i, j;
     B(h);
 }
+char C(){
+    char c = 'c';
+    return c;
+}
 int main() {
     int a, b;
     h = 5; a = 3; b = 2;

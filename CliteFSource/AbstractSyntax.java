@@ -9,13 +9,20 @@ class Program {
     // CliteF:  Program = Declarations global ; Functions functions
     //TODO: Test for CliteF
 
-    Declarations decpart;
+    VarDeclarations decpart;
 	Functions functions;    //Arraylist of functions
 
-    Program (Declarations ds, Functions fs) {
-        decpart = ds;
-        functions = fs;
-	}
+    Program (Declarations ds) {
+        decpart = new VarDeclarations();
+        functions = new Functions();
+        for (Declaration d : ds){
+            if (d instanceof Function){
+                functions.add((Function)d);
+            } else {
+                decpart.add((VarDeclaration)d);
+            }
+        }
+    }
 	
     //TODO: Test for CliteF Program
 	public void display(){
@@ -23,7 +30,7 @@ class Program {
 		System.out.println("  Declarations:");
 		System.out.println("    Declarations = {");
 		for(Declaration d : decpart){
-			d.display(); 	//this one is hardcoded
+			d.display(6); 	//this one is hardcoded
 		}
 		System.out.println("    }");
 		System.out.println("  Functions:");
@@ -39,9 +46,9 @@ class Functions extends ArrayList<Function> {
     //a list of functions f1, f2, ..., fn
 }
 
-class Function {
+class Function extends Declaration {
     //Function = Type t; String id; Declarations params, locals; Block body
-    Type t;
+    //Type t in Declaration
     String id;
     Declarations params;
     Declarations locals;
@@ -49,7 +56,7 @@ class Function {
     
     //TODO:Add MORE? logic and helper methods
     Function (Type type, String name, Declarations parameters, Declarations localss, Block functionBody){
-        t = type;
+        super(type);
         id = name;
         params = parameters;
         locals = localss;
@@ -65,27 +72,54 @@ class Function {
     void setID(String newID) { id = newID; }
 
     //TODO: Test display method
-    display(int ind){
+    public void display(int ind){
         for (int i = 0; i < ind; i++){
             System.out.print(" ");
         }
-        System.out.println(type+" "+id+": "); 
+        System.out.println(t+" "+id+": "); 
         for (int i = 0; i < ind; i++){
-            System.out.print(" ");
+            System.out.print("  ");
         }
         System.out.println("Parameters: ");
-        params.display(ind + 2);
+        for (Declaration d : params){
+            d.display(ind + 4);
+        }
         for (int i = 0; i < ind; i++){
-            System.out.print(" ");
+            System.out.print("  ");
         }
         System.out.println("Declarations local to "+id+": ");
-        locals.display(ind + 2);
+        for (Declaration d : locals){
+            d.display(ind + 4);
+        }
         for (int i = 0; i < ind; i++){
-            System.out.print(" ");
+            System.out.print("  ");
         }
         System.out.println(id+"'s Body: ");
-        body.display(ind + 2);
+        body.display(ind + 4);
     }
+}
+
+class VarDeclaration extends Declaration {
+    //Type t from Declaration
+    Variable v;
+
+    VarDeclaration(Variable var, Type type){
+        super(type);
+        this.v = var;
+    }
+
+    public void display(int ind){
+		for (int i = 0; i < ind; i++){
+            System.out.print(" ");
+        }
+        System.out.print("<" + v + ", " + t + ">\n");
+    }
+}
+
+class VarDeclarations extends ArrayList<VarDeclaration> {
+    // Declarations = Declaration*
+    // (a list of declarations d1, d2, ..., dn)
+	
 }
 
 class Declarations extends ArrayList<Declaration> {
@@ -94,18 +128,17 @@ class Declarations extends ArrayList<Declaration> {
 	
 }
 
-class Declaration {
+
+abstract class Declaration {
 // Declaration = Variable v; Type t
-    Variable v;
+    //Variable v;
     Type t;
 
-    Declaration (Variable var, Type type) {
-        v = var; t = type;
+    Declaration (Type type) {
+        t = type;
     } // declaration */
 	
-	public void display(){
-		System.out.println("      <" + v + ", " + t + ">");
-	}
+	abstract public void display(int ind);
 }
 
 class Type {
@@ -244,15 +277,57 @@ class CallS extends Statement {
     String getName() { return name; }
     void setName(String newName) { name = newName; }
 
-    //TODO: Add a display method
+    //TODO: TEST display method
+    public void display(int ind){
+		for (int i = 0; i < (ind); i++){
+			System.out.print(" ");
+		}
+        System.out.print("Calling " + name + ":\n");
+        for (Expression e : args) {
+            e.display(ind + 2);
+        }
+    }
 }
 
 class Return extends Statement {
     // Return = Variable target; Expression result
-    Variable target;
+    Variable target = null;
     Expression result;
-    //TODO: Add any logic/helper methods
-    //TODO: Add a display method
+    //TODO: Add MORE? logic/helper methods
+    Return(Variable t, Expression r){
+        target = t;
+        result = r;
+    }
+
+    Return(Expression r){
+        result = r;
+        //It gets target from the assigned call 
+    }
+
+    Variable getTarget(){ return target; }
+    Expression getResult(){ return result; }
+    void setTarget(Variable newTarget){ target = newTarget; }
+    void setResult(Expression newResult){ result = newResult; }
+
+    //TODO: TEST a display method
+	public void display(int ind){
+        for (int i = 0; i < (ind); i++){
+		    System.out.print(" ");
+	    }
+        System.out.print("Return:\n");
+	    if (target != null){
+            for (int i = 0; i < (ind + 2); i++){
+		        System.out.print(" ");
+	        }
+            target.display(ind + 4);    //Maybe just two here
+            System.out.print("Target:\n");
+	    }
+        for (int i = 0; i < (ind + 2); i++){
+		    System.out.print(" ");
+	    }
+        System.out.print("Result:\n");
+        result.display(ind + 4);    //Maybe just two here
+    }
 }
 
 class Expressions extends ArrayList<Expression> {
@@ -476,12 +551,32 @@ class Unary extends Expression {
 	}
 }
 
-class CallE extends Statement {
+class CallE extends Expression {
     // CallE = String name; Expressions args
     String name;
     Expressions args;
+    
     //TODO: Add any logic/helper methods
+    CallE(String newName, Expressions arguments){
+        name = newName;
+        args = arguments;
+    }
+
+    void setName(String newName){ name = newName; }
+    void setArgs(Expressions newArgs){ args = newArgs; }
+    String getName(){ return name; }
+    Expressions getArgs(){ return args; }
+
     //TODO: Add a display method
+    public void display(int ind){
+		for (int i = 0; i < ind; i++){
+			System.out.print(" ");
+		}
+        System.out.print("Calling "+name+":\n");
+        for (Expression e : args){
+            e.display(ind + 2);
+        }
+    }
 }
 
 class Operator {
