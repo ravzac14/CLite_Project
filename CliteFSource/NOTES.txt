@@ -1,1 +1,0 @@
-In type transformer: fix the way it's using floatmap to check the tags instead of the value
